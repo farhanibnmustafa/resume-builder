@@ -202,14 +202,28 @@ export const CreativeStudioTemplate: React.FC<TemplateProps> = ({ data, theme })
     references: references && references.length > 0 ? (
       <section key="references" className="creative-section">
         <h3 className="creative-section-title" style={{ color: colorTheme.primary }}>References</h3>
-        {references.map((ref) => (
-          <div key={ref.id} className="creative-edu-block" style={{ marginBottom: '10px' }}>
-            <div className="edu-title">{ref.name}</div>
-            <div className="edu-school">{ref.position}{ref.company && `, ${ref.company}`}</div>
-            {ref.email && <div className="edu-date">Email: {ref.email}</div>}
-            {ref.phone && <div className="edu-date">Phone: {ref.phone}</div>}
-          </div>
-        ))}
+        <div className="references-grid">
+          {references.map((ref) => (
+            <div key={ref.id} className="ref-card" style={{ borderLeftColor: colorTheme.primary }}>
+              <div className="ref-name">{ref.name}</div>
+              <div className="ref-title">{ref.position}{ref.company && `, ${ref.company}`}</div>
+              <div className="ref-contacts-container">
+                {ref.email && (
+                  <div className="ref-contact-item">
+                    <Mail size={12} style={{ color: colorTheme.primary, flexShrink: 0 }} />
+                    <span>{ref.email}</span>
+                  </div>
+                )}
+                {ref.phone && (
+                  <div className="ref-contact-item">
+                    <Phone size={12} style={{ color: colorTheme.primary, flexShrink: 0 }} />
+                    <span>{ref.phone}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
       </section>
     ) : null,
   };

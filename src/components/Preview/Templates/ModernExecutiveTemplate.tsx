@@ -282,11 +282,23 @@ export const ModernExecutiveTemplate: React.FC<TemplateProps> = ({ data, theme }
         </h3>
         <div className="references-grid">
           {references.map((ref) => (
-            <div key={ref.id} className="ref-card">
-              <div className="ref-name"><strong>{ref.name}</strong></div>
+            <div key={ref.id} className="ref-card" style={{ borderLeftColor: colorTheme.primary }}>
+              <div className="ref-name">{ref.name}</div>
               <div className="ref-title">{ref.position}{ref.company && `, ${ref.company}`}</div>
-              {ref.email && <div className="ref-contact">Email: {ref.email}</div>}
-              {ref.phone && <div className="ref-contact">Phone: {ref.phone}</div>}
+              <div className="ref-contacts-container">
+                {ref.email && (
+                  <div className="ref-contact-item">
+                    <Mail size={12} style={{ color: colorTheme.primary, flexShrink: 0 }} />
+                    <span>{ref.email}</span>
+                  </div>
+                )}
+                {ref.phone && (
+                  <div className="ref-contact-item">
+                    <Phone size={12} style={{ color: colorTheme.primary, flexShrink: 0 }} />
+                    <span>{ref.phone}</span>
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </div>

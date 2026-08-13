@@ -1,6 +1,6 @@
 import React from 'react';
 import type { ResumeData, ThemeConfig } from '../../../types/resume';
-import { Mail, Phone, MapPin, Globe, Briefcase, GraduationCap, Code, Cpu, Award, Plus, Info, Quote, ExternalLink } from 'lucide-react';
+import { Mail, Phone, MapPin, Globe, Briefcase, GraduationCap, Code, Cpu, Award, Plus, Info, Quote, ExternalLink, ChevronRight } from 'lucide-react';
 import { LinkedinIcon, GithubIcon } from '../../Common/SocialIcons';
 
 interface TemplateProps {
@@ -172,7 +172,7 @@ export const ExecutiveInnovatorTemplate: React.FC<TemplateProps> = ({ data, them
               <ul className="exact-bullet-list">
                 {exp.highlights.map((h, i) => (
                   <li key={i}>
-                    <span className="exact-chevron" style={{ color: primaryBlue }}>&gt;</span>
+                    <ChevronRight size={13} style={{ color: primaryBlue, flexShrink: 0, marginTop: '3px' }} />
                     <span>{h}</span>
                   </li>
                 ))}
@@ -284,7 +284,7 @@ export const ExecutiveInnovatorTemplate: React.FC<TemplateProps> = ({ data, them
         <ul className="exact-bullet-list">
           {certifications.map((c) => (
             <li key={c.id}>
-              <span className="exact-chevron" style={{ color: primaryBlue }}>&gt;</span>
+              <ChevronRight size={13} style={{ color: primaryBlue, flexShrink: 0, marginTop: '3px' }} />
               <span>
                 <strong>{c.title}</strong> — {c.issuer} ({c.issueDate})
               </span>
@@ -309,7 +309,7 @@ export const ExecutiveInnovatorTemplate: React.FC<TemplateProps> = ({ data, them
               const hasExtraInfo = Boolean(item.subtitle || item.description || item.date);
               return (
                 <li key={item.id}>
-                  <span className="exact-chevron" style={{ color: primaryBlue }}>&gt;</span>
+                  <ChevronRight size={13} style={{ color: primaryBlue, flexShrink: 0, marginTop: '3px' }} />
                   <div style={{ display: 'inline-block' }}>
                     {hasExtraInfo ? <strong>{item.title}</strong> : <span>{item.title}</span>}
                     {item.subtitle && <div className="exact-subtext" style={{ fontSize: '0.8rem', color: '#64748b' }}>{item.subtitle}</div>}
@@ -397,14 +397,32 @@ export const ExecutiveInnovatorTemplate: React.FC<TemplateProps> = ({ data, them
         <div className="exact-references-grid">
           {references.map((ref) => (
             <div key={ref.id} className="exact-ref-card" style={{ borderLeftColor: primaryBlue }}>
-              <div className="exact-degree-title">
-                <strong>{ref.name}</strong>
+              <div className="exact-ref-header">
+                <strong className="exact-ref-name">{ref.name}</strong>
               </div>
-              <div className="exact-institution">
-                {ref.position}{ref.company && `, ${ref.company}`}
+              {(ref.position || ref.company) && (
+                <div className="exact-ref-position">
+                  {ref.position}{ref.company && `, ${ref.company}`}
+                </div>
+              )}
+              <div className="exact-ref-contacts">
+                {ref.email && (
+                  <div className="exact-ref-contact-item">
+                    <span className="exact-ref-icon-bg" style={{ backgroundColor: `${primaryBlue}15`, color: primaryBlue }}>
+                      <Mail size={11} />
+                    </span>
+                    <a href={`mailto:${ref.email}`} className="exact-ref-link">{ref.email}</a>
+                  </div>
+                )}
+                {ref.phone && (
+                  <div className="exact-ref-contact-item">
+                    <span className="exact-ref-icon-bg" style={{ backgroundColor: `${primaryBlue}15`, color: primaryBlue }}>
+                      <Phone size={11} />
+                    </span>
+                    <a href={`tel:${ref.phone}`} className="exact-ref-link">{ref.phone}</a>
+                  </div>
+                )}
               </div>
-              {ref.email && <div className="exact-subtext">@ {ref.email}</div>}
-              {ref.phone && <div className="exact-subtext">📞 {ref.phone}</div>}
             </div>
           ))}
         </div>
