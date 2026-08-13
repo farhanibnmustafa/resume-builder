@@ -99,7 +99,7 @@ export function generateSmartBulletsForExperience(
   suggestions.push({
     verb: 'Optimized',
     category: 'Performance',
-    text: `Optimized backend query execution and caching mechanisms using ${skill3}, reducing database latency by 40% for active daily traffic.`
+    text: `Optimized backend query execution and caching mechanisms using ${skill3} and ${skill4}, reducing database latency by 40% for active daily traffic.`
   });
 
   // 6. Systems Integration
