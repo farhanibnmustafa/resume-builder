@@ -91,8 +91,8 @@ export const CustomSectionForm: React.FC = () => {
     <div className="form-section">
       <div className="form-section-header between">
         <div>
-          <h2 className="flex-align"><Layers className="section-icon" /> Custom Resume Sections (e.g. FORCES)</h2>
-          <p>Add custom headings like FORCES, Publications, Speaking, or Awards. Drag sections and items to reorder.</p>
+          <h2 className="flex-align"><Layers className="section-icon" /> Custom Resume Sections (e.g. Soft Skills)</h2>
+          <p>Add custom headings like Soft Skills, Publications, Speaking, or Awards. Drag sections and items to reorder.</p>
         </div>
         <button className="btn btn-primary btn-sm" onClick={addCustomSection}>
           <Plus size={16} /> Add Custom Section
@@ -128,7 +128,7 @@ export const CustomSectionForm: React.FC = () => {
                     className="input-field category-name-input"
                     value={sec.sectionTitle}
                     onChange={(e) => updateCustomSection(sec.id, { sectionTitle: e.target.value })}
-                    placeholder="Section Title (e.g. FORCES or Publications)"
+                    placeholder="Section Title (e.g. Soft Skills or Publications)"
                   />
                 </div>
 

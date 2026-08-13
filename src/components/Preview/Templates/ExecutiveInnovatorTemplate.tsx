@@ -102,18 +102,22 @@ export const ExecutiveInnovatorTemplate: React.FC<TemplateProps> = ({ data, them
     </header>
   );
 
-  // Dynamic FORCES & Custom Sections handling
-  const forcesCustomSection = customSections.find(cs => cs.sectionTitle.toUpperCase().includes('FORCE'));
-  const otherCustomSections = customSections.filter(cs => !cs.sectionTitle.toUpperCase().includes('FORCE'));
+  // Dynamic SOFT SKILLS & Custom Sections handling
+  const softSkillsCustomSection = customSections.find(cs => 
+    cs.sectionTitle.toUpperCase().includes('SOFT') || cs.sectionTitle.toUpperCase().includes('FORCE')
+  );
+  const otherCustomSections = customSections.filter(cs => 
+    !cs.sectionTitle.toUpperCase().includes('SOFT') && !cs.sectionTitle.toUpperCase().includes('FORCE')
+  );
 
-  const forcesItems = forcesCustomSection && forcesCustomSection.items.length > 0
-    ? forcesCustomSection.items
+  const softSkillsItems = softSkillsCustomSection && softSkillsCustomSection.items.length > 0
+    ? softSkillsCustomSection.items
     : [
-        { id: 'f1', title: 'Passion for Growth', subtitle: '', description: '' },
-        { id: 'f2', title: 'Project Management', subtitle: '', description: '' },
-        { id: 'f3', title: 'Leadership and Coordination', subtitle: '', description: '' },
-        { id: 'f4', title: 'Creativity and Innovation', subtitle: '', description: '' },
-        { id: 'f5', title: 'Technical Expertise', subtitle: '', description: '' }
+        { id: 'f1', title: 'Problem Solving & Critical Thinking', subtitle: '', description: '' },
+        { id: 'f2', title: 'Agile & Project Management', subtitle: '', description: '' },
+        { id: 'f3', title: 'Team Leadership & Communication', subtitle: '', description: '' },
+        { id: 'f4', title: 'Creativity & Technical Innovation', subtitle: '', description: '' },
+        { id: 'f5', title: 'Adaptability & Continuous Growth', subtitle: '', description: '' }
       ];
 
   const sectionMap: Record<string, React.ReactNode> = {
@@ -301,11 +305,11 @@ export const ExecutiveInnovatorTemplate: React.FC<TemplateProps> = ({ data, them
             <span className="exact-icon-badge" style={{ backgroundColor: `${primaryBlue}15`, color: primaryBlue }}>
               <Plus size={15} />
             </span>
-            <span>{forcesCustomSection ? forcesCustomSection.sectionTitle.toUpperCase() : 'FORCES'}</span>
+            <span>{softSkillsCustomSection ? softSkillsCustomSection.sectionTitle.toUpperCase() : 'SOFT SKILLS'}</span>
           </h3>
           <div className="exact-section-line" />
           <ul className="exact-bullet-list">
-            {forcesItems.map((item) => {
+            {softSkillsItems.map((item) => {
               const hasExtraInfo = Boolean(item.subtitle || item.description || item.date);
               return (
                 <li key={item.id}>

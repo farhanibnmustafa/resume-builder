@@ -374,32 +374,32 @@ export const SAMPLE_SOFTWARE_ENGINEER: ResumeData = {
   customSections: [
     {
       id: 'cs-forces',
-      sectionTitle: 'FORCES',
+      sectionTitle: 'SOFT SKILLS',
       items: [
         {
           id: 'csi-f1',
-          title: 'Passion for Growth',
-          description: 'Continuous learning and skill enhancement in modern tech stack.'
+          title: 'Problem Solving & Critical Thinking',
+          description: 'Analyzing complex challenges and crafting efficient scalable solutions.'
         },
         {
           id: 'csi-f2',
-          title: 'Project Management',
-          description: 'Planning, executing, and delivering tech projects smoothly.'
+          title: 'Project Management & Agility',
+          description: 'Planning, executing, and delivering high-impact projects on schedule.'
         },
         {
           id: 'csi-f3',
-          title: 'Leadership and Coordination',
-          description: 'Leading teams and delegating tasks effectively.'
+          title: 'Team Leadership & Collaboration',
+          description: 'Fostering teamwork, mentoring team members, and aligning stakeholders.'
         },
         {
           id: 'csi-f4',
-          title: 'Creativity and Innovation',
-          description: 'Bringing fresh design and functional concepts into practice.'
+          title: 'Creativity & Technical Innovation',
+          description: 'Designing intuitive user experiences and exploring modern tech tools.'
         },
         {
           id: 'csi-f5',
-          title: 'Technical Expertise',
-          description: 'Strong foundation in software engineering and web development.'
+          title: 'Adaptability & Continuous Growth',
+          description: 'Rapidly adopting new technologies and industry best practices.'
         }
       ]
     }
