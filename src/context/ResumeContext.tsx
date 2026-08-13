@@ -116,7 +116,32 @@ export const ResumeProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const [resumeData, setResumeData] = useState<ResumeData>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_DATA);
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && Array.isArray(parsed.customSections)) {
+          const defaultMap: Record<string, string> = {
+            'Passion for Growth': 'Problem Solving & Critical Thinking',
+            'Project Management': 'Agile & Project Management',
+            'Leadership and Coordination': 'Team Leadership & Communication',
+            'Creativity and Innovation': 'Creativity & Technical Innovation',
+            'Technical Expertise': 'Adaptability & Continuous Growth',
+          };
+          parsed.customSections = parsed.customSections.map((sec: CustomSection) => {
+            if (sec.sectionTitle && sec.sectionTitle.toUpperCase() === 'FORCES') {
+              return {
+                ...sec,
+                sectionTitle: 'SOFT SKILLS',
+                items: sec.items.map((item) => ({
+                  ...item,
+                  title: defaultMap[item.title] || item.title
+                }))
+              };
+            }
+            return sec;
+          });
+        }
+        return parsed;
+      }
     } catch (e) {
       console.warn('Failed to parse saved resume data:', e);
     }

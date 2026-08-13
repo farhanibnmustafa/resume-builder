@@ -110,7 +110,15 @@ export const ExecutiveInnovatorTemplate: React.FC<TemplateProps> = ({ data, them
     !cs.sectionTitle.toUpperCase().includes('SOFT') && !cs.sectionTitle.toUpperCase().includes('FORCE')
   );
 
-  const softSkillsItems = softSkillsCustomSection && softSkillsCustomSection.items.length > 0
+  const defaultSoftSkillTitles: Record<string, string> = {
+    'Passion for Growth': 'Problem Solving & Critical Thinking',
+    'Project Management': 'Agile & Project Management',
+    'Leadership and Coordination': 'Team Leadership & Communication',
+    'Creativity and Innovation': 'Creativity & Technical Innovation',
+    'Technical Expertise': 'Adaptability & Continuous Growth',
+  };
+
+  const rawItems = softSkillsCustomSection && softSkillsCustomSection.items.length > 0
     ? softSkillsCustomSection.items
     : [
         { id: 'f1', title: 'Problem Solving & Critical Thinking', subtitle: '', description: '' },
@@ -119,6 +127,11 @@ export const ExecutiveInnovatorTemplate: React.FC<TemplateProps> = ({ data, them
         { id: 'f4', title: 'Creativity & Technical Innovation', subtitle: '', description: '' },
         { id: 'f5', title: 'Adaptability & Continuous Growth', subtitle: '', description: '' }
       ];
+
+  const softSkillsItems = rawItems.map((item) => ({
+    ...item,
+    title: defaultSoftSkillTitles[item.title] || item.title
+  }));
 
   const sectionMap: Record<string, React.ReactNode> = {
     summary: personalInfo.summary ? (
@@ -305,7 +318,7 @@ export const ExecutiveInnovatorTemplate: React.FC<TemplateProps> = ({ data, them
             <span className="exact-icon-badge" style={{ backgroundColor: `${primaryBlue}15`, color: primaryBlue }}>
               <Plus size={15} />
             </span>
-            <span>{softSkillsCustomSection ? softSkillsCustomSection.sectionTitle.toUpperCase() : 'SOFT SKILLS'}</span>
+            <span>{softSkillsCustomSection && softSkillsCustomSection.sectionTitle.toUpperCase() !== 'FORCES' ? softSkillsCustomSection.sectionTitle.toUpperCase() : 'SOFT SKILLS'}</span>
           </h3>
           <div className="exact-section-line" />
           <ul className="exact-bullet-list">
