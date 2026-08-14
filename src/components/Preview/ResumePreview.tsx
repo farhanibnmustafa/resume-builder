@@ -42,10 +42,31 @@ export const ResumePreview: React.FC = () => {
     }
   }, [setZoomLevel]);
 
-  // Auto-fit only once on initial mount
+  // Auto-fit on initial mount & handle window / viewport resize dynamically
   useEffect(() => {
     const timer = setTimeout(handleFitToScreen, 150);
-    return () => clearTimeout(timer);
+
+    const handleResize = () => {
+      handleFitToScreen();
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    let resizeObserver: ResizeObserver | null = null;
+    if (viewportRef.current && typeof ResizeObserver !== 'undefined') {
+      resizeObserver = new ResizeObserver(() => {
+        handleFitToScreen();
+      });
+      resizeObserver.observe(viewportRef.current);
+    }
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', handleResize);
+      if (resizeObserver) {
+        resizeObserver.disconnect();
+      }
+    };
   }, [handleFitToScreen]);
 
 

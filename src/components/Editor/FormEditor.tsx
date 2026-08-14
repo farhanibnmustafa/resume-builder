@@ -69,7 +69,10 @@ export const FormEditor: React.FC = () => {
             <button
               key={tab.id}
               className={`tab-btn ${activeTab === tab.id ? 'active' : ''} ${tab.highlight ? 'highlight-tab' : ''}`}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={(e) => {
+                setActiveTab(tab.id);
+                (e.currentTarget as HTMLElement).scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+              }}
             >
               <Icon size={16} />
               <span>{tab.label}</span>

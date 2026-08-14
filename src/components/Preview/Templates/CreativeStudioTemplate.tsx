@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { ResumeData, ThemeConfig } from '../../../types/resume';
-import { Mail, Phone, MapPin, Globe, Award, Briefcase, GraduationCap, Code } from 'lucide-react';
+import { Mail, Phone, MapPin, Globe, Award, Briefcase, GraduationCap, Code, ExternalLink } from 'lucide-react';
 import { LinkedinIcon } from '../../Common/SocialIcons';
 
 interface TemplateProps {
@@ -8,13 +8,25 @@ interface TemplateProps {
   theme: ThemeConfig;
 }
 
+const CREATIVE_DEFAULT_SECTION_ORDER = ['experience', 'projects', 'education', 'skills', 'certifications', 'languages', 'custom', 'references'];
+
 export const CreativeStudioTemplate: React.FC<TemplateProps> = ({ data, theme }) => {
   const { personalInfo, experiences, education, skillCategories, projects, certifications, languages, customSections, references } = data;
   const { colorTheme, fontFamily, showPhoto, showSkillBars, pageMode, sectionOrder } = theme;
 
-  const activeSectionOrder = sectionOrder || ['experience', 'projects', 'education', 'skills', 'certifications', 'languages', 'custom', 'references'];
+  const activeSectionOrder = useMemo(
+    () => {
+      const merged = sectionOrder
+        ? [...sectionOrder, ...CREATIVE_DEFAULT_SECTION_ORDER.filter((key) => !sectionOrder.includes(key))]
+        : [...CREATIVE_DEFAULT_SECTION_ORDER];
+      return [...merged.filter((key) => key !== 'references'), 'references'];
+    },
+    [sectionOrder]
+  );
   const totalItems = experiences.length + projects.length + certifications.length + customSections.length;
   const isMultiPage = pageMode === '2-page' || (pageMode === 'auto' && totalItems >= 5);
+  const measureRef = useRef<HTMLDivElement>(null);
+  const [measuredColumns, setMeasuredColumns] = useState<{ main: string[][]; sidebar: string[][] }>({ main: [], sidebar: [] });
 
   const creativeHeader = (
     <header
@@ -53,6 +65,27 @@ export const CreativeStudioTemplate: React.FC<TemplateProps> = ({ data, theme })
         )}
       </div>
     </header>
+  );
+
+  const signatureBlock = (
+    <div
+      className="creative-signature-block"
+      style={{
+        position: 'absolute',
+        right: '16mm',
+        bottom: '16mm',
+        width: '210px',
+        textAlign: 'center',
+      }}
+    >
+      <div style={{ fontFamily: "'Dancing Script', 'Brush Script MT', cursive", fontSize: '1.4rem', fontWeight: 600, color: colorTheme.primary }}>
+        {personalInfo.fullName}
+      </div>
+      <div style={{ height: '1.5px', backgroundColor: colorTheme.primary, margin: '3px 0 5px' }} />
+      <div style={{ fontSize: '0.7rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.6px' }}>
+        Applicant Signature
+      </div>
+    </div>
   );
 
   const sectionMap: Record<string, React.ReactNode> = {
@@ -165,7 +198,19 @@ export const CreativeStudioTemplate: React.FC<TemplateProps> = ({ data, theme })
         <ul className="creative-bullet-list">
           {certifications.map((c) => (
             <li key={c.id}>
-              <strong>{c.title}</strong> — {c.issuer} ({c.issueDate})
+              {c.credentialUrl ? (
+                <a
+                  href={c.credentialUrl.startsWith('http') ? c.credentialUrl : `https://${c.credentialUrl}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{ color: 'inherit', fontWeight: 700, textDecoration: 'none' }}
+                >
+                  {c.title} <ExternalLink size={11} style={{ display: 'inline', verticalAlign: 'middle' }} />
+                </a>
+              ) : (
+                <strong>{c.title}</strong>
+              )}
+              {' — '}{c.issuer} ({c.issueDate})
             </li>
           ))}
         </ul>
@@ -228,60 +273,246 @@ export const CreativeStudioTemplate: React.FC<TemplateProps> = ({ data, theme })
     ) : null,
   };
 
-  if (isMultiPage) {
-    const splitCount = Math.min(4, Math.ceil(activeSectionOrder.length / 2));
-    const page1Sections = activeSectionOrder.slice(0, splitCount);
-    const page2Sections = activeSectionOrder.slice(splitCount);
+  const tokenMap: Record<string, React.ReactNode> = {};
+  const sectionTokenKeys: Record<string, string[]> = {};
 
-    const mainKeys = ['experience', 'projects', 'summary', 'custom', 'references'];
+  const splitDirectChildren = (sectionKey: string) => {
+    const section = sectionMap[sectionKey];
+    if (!React.isValidElement<{ children?: React.ReactNode }>(section)) return;
+    const children = React.Children.toArray(section.props.children);
+    const heading = children.slice(0, 1);
+    const items = children.slice(1);
+    if (items.length === 0) return;
+
+    sectionTokenKeys[sectionKey] = items.map((item, index) => {
+      const tokenKey = `${sectionKey}:${index}`;
+      tokenMap[tokenKey] = React.cloneElement(section, { key: tokenKey }, ...(index === 0 ? heading : []), item);
+      return tokenKey;
+    });
+  };
+
+  const splitNestedChildren = (sectionKey: string, itemsPerToken = 1) => {
+    const section = sectionMap[sectionKey];
+    if (!React.isValidElement<{ children?: React.ReactNode }>(section)) return;
+    const sectionChildren = React.Children.toArray(section.props.children);
+    const heading = sectionChildren.slice(0, 1);
+    const container = sectionChildren[1];
+    if (!React.isValidElement<{ children?: React.ReactNode }>(container)) return;
+    const items = React.Children.toArray(container.props.children);
+    if (items.length === 0) return;
+
+    const keys: string[] = [];
+    for (let start = 0; start < items.length; start += itemsPerToken) {
+      const tokenKey = `${sectionKey}:${start / itemsPerToken}`;
+      const tokenContainer = React.cloneElement(
+        container,
+        { key: `${tokenKey}-items` },
+        ...items.slice(start, start + itemsPerToken)
+      );
+      tokenMap[tokenKey] = React.cloneElement(
+        section,
+        { key: tokenKey },
+        ...(start === 0 ? heading : []),
+        tokenContainer
+      );
+      keys.push(tokenKey);
+    }
+    sectionTokenKeys[sectionKey] = keys;
+  };
+
+  splitNestedChildren('experience');
+  splitNestedChildren('projects', 2);
+  splitDirectChildren('education');
+  splitDirectChildren('skills');
+  splitNestedChildren('certifications');
+  splitNestedChildren('languages');
+  splitNestedChildren('references', 2);
+
+  const mainKeys = ['experience', 'projects', 'custom', 'references'];
+  const orderedTokens = useMemo(() => {
+    const main: string[] = [];
+    const sidebar: string[] = [];
+    activeSectionOrder.forEach((sectionKey) => {
+      const keys = sectionTokenKeys[sectionKey]
+        || (sectionMap[sectionKey] ? [`${sectionKey}:whole`] : []);
+      if (keys[0]?.endsWith(':whole')) tokenMap[keys[0]] = sectionMap[sectionKey];
+      (mainKeys.includes(sectionKey) ? main : sidebar).push(...keys);
+    });
+    return { main, sidebar };
+    // Token nodes are rebuilt from the latest resume data on every render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeSectionOrder, data]);
+
+  useLayoutEffect(() => {
+    if (!isMultiPage || !measureRef.current) {
+      setMeasuredColumns({ main: [], sidebar: [] });
+      return;
+    }
+
+    const root = measureRef.current;
+    const rootStyle = window.getComputedStyle(root);
+    const verticalPadding = parseFloat(rootStyle.paddingTop) + parseFloat(rootStyle.paddingBottom);
+    const pageContentHeight = (297 / 25.4) * 96 - verticalPadding;
+    const headerHeight = root.querySelector<HTMLElement>('[data-creative-measure-header]')?.offsetHeight || 0;
+    const signatureHeight = root.querySelector<HTMLElement>('[data-creative-measure-signature]')?.offsetHeight || 0;
+    const firstPageCapacity = Math.max(160, pageContentHeight - headerHeight - 16);
+    const nextPageCapacity = pageContentHeight;
+
+    const packColumn = (column: 'main' | 'sidebar', keys: string[]) => {
+      const pages: string[][] = [[]];
+      const used = [0];
+      const heights: Record<string, number> = {};
+      keys.forEach((key) => {
+        const element = root.querySelector<HTMLElement>(`[data-creative-${column}-key="${CSS.escape(key)}"]`);
+        if (!element) return;
+        const section = element.querySelector<HTMLElement>(':scope > .creative-section');
+        const sectionStyle = section ? window.getComputedStyle(section) : null;
+        const height = element.getBoundingClientRect().height
+          + (parseFloat(sectionStyle?.marginTop || '0') || 0)
+          + (parseFloat(sectionStyle?.marginBottom || '0') || 0);
+        heights[key] = height;
+        let pageIndex = pages.length - 1;
+        const capacity = pageIndex === 0 ? firstPageCapacity : nextPageCapacity;
+        if (pages[pageIndex].length > 0 && used[pageIndex] + height > capacity) {
+          pages.push([]);
+          used.push(0);
+          pageIndex += 1;
+        }
+        pages[pageIndex].push(key);
+        used[pageIndex] += height;
+      });
+      return { pages, used, heights };
+    };
+
+    const packedMain = packColumn('main', orderedTokens.main);
+    const packedSidebar = packColumn('sidebar', orderedTokens.sidebar);
+
+    // On continuation pages, use an empty area in the wider main column before
+    // creating a mostly blank page for sidebar overflow. A token measured in
+    // the narrower sidebar can only become the same height or shorter in main.
+    const candidatePageCount = Math.max(packedMain.pages.length, packedSidebar.pages.length);
+    for (let targetPage = 1; targetPage < candidatePageCount; targetPage += 1) {
+      const sourcePage = targetPage + 1;
+      if (!packedSidebar.pages[sourcePage]?.length) continue;
+      if (!packedMain.pages[targetPage]) {
+        packedMain.pages[targetPage] = [];
+        packedMain.used[targetPage] = 0;
+      }
+
+      while (packedSidebar.pages[sourcePage].length > 0) {
+        const key = packedSidebar.pages[sourcePage][0];
+        const height = packedSidebar.heights[key] || 0;
+        if (packedMain.used[targetPage] + height > nextPageCapacity) break;
+        packedSidebar.pages[sourcePage].shift();
+        packedSidebar.used[sourcePage] = Math.max(0, (packedSidebar.used[sourcePage] || 0) - height);
+        packedMain.pages[targetPage].push(key);
+        packedMain.used[targetPage] += height;
+      }
+    }
+
+    // References are always the final content section, regardless of a saved
+    // drag-and-drop order or which column produced more continuation pages.
+    const referenceKeys = orderedTokens.main.filter((key) => key.startsWith('references:'));
+    referenceKeys.forEach((key) => {
+      packedMain.pages.forEach((page, pageIndex) => {
+        if (!page.includes(key)) return;
+        packedMain.pages[pageIndex] = page.filter((pageKey) => pageKey !== key);
+        packedMain.used[pageIndex] = Math.max(0, (packedMain.used[pageIndex] || 0) - (packedMain.heights[key] || 0));
+      });
+    });
+
+    let referencePageIndex = Math.max(packedMain.pages.length, packedSidebar.pages.length) - 1;
+    referenceKeys.forEach((key) => {
+      const height = packedMain.heights[key] || 0;
+      while (packedMain.pages.length <= referencePageIndex) {
+        packedMain.pages.push([]);
+        packedMain.used.push(0);
+      }
+      const capacity = referencePageIndex === 0 ? firstPageCapacity : nextPageCapacity;
+      if (packedMain.used[referencePageIndex] + height > capacity) {
+        referencePageIndex += 1;
+        while (packedMain.pages.length <= referencePageIndex) {
+          packedMain.pages.push([]);
+          packedMain.used.push(0);
+        }
+      }
+      packedMain.pages[referencePageIndex].push(key);
+      packedMain.used[referencePageIndex] += height;
+    });
+
+    while (packedMain.pages.length > 1 && packedMain.pages[packedMain.pages.length - 1].length === 0) packedMain.pages.pop();
+    while (packedSidebar.pages.length > 1 && packedSidebar.pages[packedSidebar.pages.length - 1].length === 0) packedSidebar.pages.pop();
+
+    const finalPageIndex = Math.max(packedMain.pages.length, packedSidebar.pages.length) - 1;
+    const finalPageCapacity = finalPageIndex === 0 ? firstPageCapacity : nextPageCapacity;
+    const finalSidebarUsed = packedSidebar.used[finalPageIndex] || 0;
+    if (finalSidebarUsed + signatureHeight > finalPageCapacity) {
+      while (packedSidebar.pages.length <= finalPageIndex + 1) packedSidebar.pages.push([]);
+      packedSidebar.used[finalPageIndex + 1] = 0;
+    }
+
+    const nextColumns = {
+      main: packedMain.pages,
+      sidebar: packedSidebar.pages,
+    };
+    setMeasuredColumns((current) =>
+      JSON.stringify(current) === JSON.stringify(nextColumns) ? current : nextColumns
+    );
+  }, [isMultiPage, orderedTokens, fontFamily, theme.fontSize, theme.spacing, data]);
+
+  if (isMultiPage) {
+    const mainPages = measuredColumns.main.length ? measuredColumns.main : [orderedTokens.main];
+    const sidebarPages = measuredColumns.sidebar.length ? measuredColumns.sidebar : [orderedTokens.sidebar];
+    const totalPages = Math.max(mainPages.length, sidebarPages.length);
 
     return (
       <div
         className="creative-studio-template multi-page-layout"
         style={{ fontFamily: fontFamily || 'Outfit, sans-serif', color: colorTheme.text }}
       >
-        <div className="resume-page-sheet page-1">
-          <div className="page-badge">Page 1 of 2</div>
-          {creativeHeader}
+        <div ref={measureRef} className="resume-page-sheet exact-pagination-measurer" aria-hidden="true">
+          <div data-creative-measure-header>{creativeHeader}</div>
           <div className="creative-grid-layout" style={{ marginTop: '16px' }}>
             <div className="creative-main-col">
-              {page1Sections
-                .filter((key) => mainKeys.includes(key))
-                .map((key) => sectionMap[key])}
+              {orderedTokens.main.map((key) => (
+                <div key={key} data-creative-main-key={key}>{tokenMap[key]}</div>
+              ))}
             </div>
             <div className="creative-sidebar-col">
-              {page1Sections
-                .filter((key) => !mainKeys.includes(key))
-                .map((key) => sectionMap[key])}
+              {orderedTokens.sidebar.map((key) => (
+                <div key={key} data-creative-sidebar-key={key}>{tokenMap[key]}</div>
+              ))}
             </div>
+          </div>
+          <div data-creative-measure-signature style={{ width: '210px' }}>
+            {React.cloneElement(signatureBlock, {
+              style: { ...signatureBlock.props.style, position: 'static', right: 'auto', bottom: 'auto' },
+            })}
           </div>
         </div>
 
-        <div className="page-break-gap">
-          <span className="page-break-label">--- Page 2 of 2 Sheet Below ---</span>
-        </div>
-
-        <div className="resume-page-sheet page-2">
-          <div className="page-badge">Page 2 of 2</div>
-          <header className="creative-header-banner mini-header" style={{ background: colorTheme.primary, color: '#ffffff', padding: '12px 18px' }}>
-            <h2 style={{ fontSize: '1.3rem', margin: 0 }}>
-              {personalInfo.fullName} <span style={{ fontSize: '0.85rem', opacity: 0.8 }}>— Portfolio Page 2</span>
-            </h2>
-          </header>
-
-          <div className="creative-grid-layout" style={{ marginTop: '16px' }}>
-            <div className="creative-main-col">
-              {page2Sections
-                .filter((key) => mainKeys.includes(key))
-                .map((key) => sectionMap[key])}
+        {Array.from({ length: totalPages }, (_, pageIndex) => (
+          <React.Fragment key={`page-${pageIndex + 1}`}>
+            {pageIndex > 0 && (
+              <div className="page-break-gap">
+                <span className="page-break-label">--- Page {pageIndex + 1} of {totalPages} Sheet Below ---</span>
+              </div>
+            )}
+            <div className={`resume-page-sheet page-${pageIndex + 1}`}>
+              <div className="page-badge">Page {pageIndex + 1} of {totalPages}</div>
+              {pageIndex === 0 && creativeHeader}
+              <div className="creative-grid-layout" style={{ marginTop: pageIndex === 0 ? '16px' : 0 }}>
+                <div className="creative-main-col">
+                  {(mainPages[pageIndex] || []).map((key) => tokenMap[key])}
+                </div>
+                <div className="creative-sidebar-col">
+                  {(sidebarPages[pageIndex] || []).map((key) => tokenMap[key])}
+                </div>
+              </div>
+              {pageIndex === totalPages - 1 && signatureBlock}
             </div>
-            <div className="creative-sidebar-col">
-              {page2Sections
-                .filter((key) => !mainKeys.includes(key))
-                .map((key) => sectionMap[key])}
-            </div>
-          </div>
-        </div>
+          </React.Fragment>
+        ))}
       </div>
     );
   }

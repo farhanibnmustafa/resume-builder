@@ -157,7 +157,19 @@ export const TechDeveloperTemplate: React.FC<TemplateProps> = ({ data, theme }) 
         <ul className="tech-bullet-list">
           {certifications.map((c) => (
             <li key={c.id}>
-              <strong>{c.title}</strong> — {c.issuer} ({c.issueDate})
+              {c.credentialUrl ? (
+                <a
+                  href={c.credentialUrl.startsWith('http') ? c.credentialUrl : `https://${c.credentialUrl}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{ color: 'inherit', fontWeight: 700, textDecoration: 'none' }}
+                >
+                  {c.title} <ExternalLink size={11} style={{ display: 'inline', verticalAlign: 'middle' }} />
+                </a>
+              ) : (
+                <strong>{c.title}</strong>
+              )}
+              {' — '}{c.issuer} ({c.issueDate})
             </li>
           ))}
         </ul>
@@ -262,7 +274,7 @@ export const TechDeveloperTemplate: React.FC<TemplateProps> = ({ data, theme }) 
   );
 
   if (isMultiPage) {
-    const splitCount = Math.min(3, Math.ceil(activeSectionOrder.length / 2));
+    const splitCount = Math.min(3, activeSectionOrder.length);
     const page1Sections = activeSectionOrder.slice(0, splitCount);
     const page2Sections = activeSectionOrder.slice(splitCount);
 

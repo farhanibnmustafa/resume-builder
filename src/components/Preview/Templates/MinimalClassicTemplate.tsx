@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { ResumeData, ThemeConfig } from '../../../types/resume';
+import { ExternalLink } from 'lucide-react';
 
 interface TemplateProps {
   data: ResumeData;
@@ -11,8 +12,10 @@ export const MinimalClassicTemplate: React.FC<TemplateProps> = ({ data, theme })
   const { colorTheme, fontFamily, showPhoto, showSkillBars, pageMode, sectionOrder } = theme;
 
   const activeSectionOrder = sectionOrder || ['summary', 'experience', 'education', 'skills', 'projects', 'certifications', 'languages', 'custom', 'references'];
-  const totalItems = experiences.length + projects.length + certifications.length + customSections.length;
+  const totalItems = experiences.length + education.length + projects.length + certifications.length + customSections.length;
   const isMultiPage = pageMode === '2-page' || (pageMode === 'auto' && totalItems >= 5);
+  const measureRef = useRef<HTMLDivElement>(null);
+  const [measuredPages, setMeasuredPages] = useState<string[][]>([]);
 
   const contacts = [
     personalInfo.email,
@@ -155,7 +158,19 @@ export const MinimalClassicTemplate: React.FC<TemplateProps> = ({ data, theme })
         <ul className="minimal-bullet-list">
           {certifications.map((c) => (
             <li key={c.id}>
-              <strong>{c.title}</strong> — {c.issuer} ({c.issueDate})
+              {c.credentialUrl ? (
+                <a
+                  href={c.credentialUrl.startsWith('http') ? c.credentialUrl : `https://${c.credentialUrl}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{ color: 'inherit', fontWeight: 700, textDecoration: 'none' }}
+                >
+                  {c.title} <ExternalLink size={11} style={{ display: 'inline', verticalAlign: 'middle' }} />
+                </a>
+              ) : (
+                <strong>{c.title}</strong>
+              )}
+              {' — '}{c.issuer} ({c.issueDate})
             </li>
           ))}
         </ul>
@@ -214,45 +229,180 @@ export const MinimalClassicTemplate: React.FC<TemplateProps> = ({ data, theme })
     ) : null,
   };
 
+  const splitSectionKeys: Record<string, string[]> = {};
+  const splitSection = (sectionKey: string) => {
+    const section = sectionMap[sectionKey];
+    if (!React.isValidElement<{ children?: React.ReactNode }>(section)) return;
+
+    const children = React.Children.toArray(section.props.children);
+    const heading = children.slice(0, 1);
+    const items = children.slice(1);
+    if (items.length <= 1) return;
+
+    const keys = items.map((item, index) => {
+      const chunkKey = `${sectionKey}:${index}`;
+      sectionMap[chunkKey] = React.cloneElement(section, { key: chunkKey }, ...heading, item);
+      return chunkKey;
+    });
+    splitSectionKeys[sectionKey] = keys;
+  };
+
+  splitSection('experience');
+  splitSection('education');
+  splitSection('projects');
+
+  const visibleSectionKeys = useMemo(
+    () => activeSectionOrder.flatMap((key) => {
+      const chunks = splitSectionKeys[key];
+      if (chunks?.length) return chunks;
+      return sectionMap[key] ? [key] : [];
+    }),
+    // The map and chunks are rebuilt from the current resume data.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [activeSectionOrder, data]
+  );
+
+  const getSectionKey = (key: string) => key.split(':', 1)[0];
+
+  const renderSection = (key: string, index: number, pageKeys: string[]) => {
+    const section = sectionMap[key];
+    const previousKey = index > 0 ? pageKeys[index - 1] : null;
+    const repeatsOnPage = previousKey ? getSectionKey(previousKey) === getSectionKey(key) : false;
+    if (!repeatsOnPage || !React.isValidElement<{ children?: React.ReactNode }>(section)) return section;
+    return React.cloneElement(section, { key }, ...React.Children.toArray(section.props.children).slice(1));
+  };
+
+  const headerContent = (
+    <header className="minimal-header">
+      <div className="minimal-header-copy">
+        <h1 className="minimal-name" style={{ color: colorTheme.primary }}>{personalInfo.fullName}</h1>
+        <div className="minimal-jobtitle" style={{ color: colorTheme.secondary }}>{personalInfo.jobTitle}</div>
+        <div className="minimal-contact-line">
+          {contacts.map((contact) => <span key={contact}>{contact}</span>)}
+        </div>
+      </div>
+      {showPhoto && personalInfo.photoUrl && (
+        <img
+          src={personalInfo.photoUrl}
+          alt={personalInfo.fullName}
+          className="minimal-photo"
+          style={{ borderColor: colorTheme.primary }}
+        />
+      )}
+    </header>
+  );
+
+  const signatureBlock = (
+    <div className="minimal-signature-block" style={{ color: colorTheme.primary }}>
+      <div className="minimal-signature-name">{personalInfo.fullName}</div>
+      <div className="minimal-signature-line" style={{ backgroundColor: colorTheme.primary }} />
+      <div className="minimal-signature-label">Applicant Signature</div>
+    </div>
+  );
+
+  useLayoutEffect(() => {
+    if (!isMultiPage || !measureRef.current) {
+      setMeasuredPages([]);
+      return;
+    }
+
+    const root = measureRef.current;
+    const elements = Array.from(root.querySelectorAll<HTMLElement>('[data-measure-section]'));
+    const headerHeight = root.querySelector<HTMLElement>('[data-measure-header]')?.offsetHeight || 0;
+    const signatureHeight = root.querySelector<HTMLElement>('[data-minimal-measure-signature]')?.offsetHeight || 0;
+    const rootStyle = window.getComputedStyle(root);
+    const verticalPadding = parseFloat(rootStyle.paddingTop) + parseFloat(rootStyle.paddingBottom);
+    const sheetHeight = (297 / 25.4) * 96;
+    const normalCapacity = sheetHeight - verticalPadding - 4;
+    const firstCapacity = Math.max(200, normalCapacity - headerHeight);
+    const pages: string[][] = [[]];
+    const usedHeights = [0];
+    const fullHeights: Record<string, number> = {};
+
+    elements.forEach((element) => {
+      const key = element.dataset.measureSection;
+      if (!key) return;
+
+      const section = element.querySelector<HTMLElement>(':scope > .minimal-section');
+      const sectionStyle = section ? window.getComputedStyle(section) : null;
+      const outerMargin = (parseFloat(sectionStyle?.marginTop || '0') || 0)
+        + (parseFloat(sectionStyle?.marginBottom || '0') || 0);
+      const fullHeight = element.getBoundingClientRect().height + outerMargin;
+      fullHeights[key] = fullHeight;
+      const heading = element.querySelector<HTMLElement>('.minimal-section-title');
+      const headingStyle = heading ? window.getComputedStyle(heading) : null;
+      const headingHeight = heading
+        ? heading.getBoundingClientRect().height
+          + (parseFloat(headingStyle?.marginTop || '0') || 0)
+          + (parseFloat(headingStyle?.marginBottom || '0') || 0)
+        : 0;
+      let pageIndex = pages.length - 1;
+      const previousKey = pages[pageIndex].at(-1);
+      const repeatsOnPage = previousKey ? getSectionKey(previousKey) === getSectionKey(key) : false;
+      let height = repeatsOnPage ? Math.max(0, fullHeight - headingHeight) : fullHeight;
+      const capacity = pageIndex === 0 ? firstCapacity : normalCapacity;
+
+      if (pages[pageIndex].length > 0 && usedHeights[pageIndex] + height > capacity) {
+        pages.push([]);
+        usedHeights.push(0);
+        pageIndex += 1;
+        height = fullHeight;
+      }
+      pages[pageIndex].push(key);
+      usedHeights[pageIndex] += height;
+    });
+
+    let lastPageIndex = pages.length - 1;
+    const lastCapacity = lastPageIndex === 0 ? firstCapacity : normalCapacity;
+    if (usedHeights[lastPageIndex] + signatureHeight > lastCapacity) {
+      const movedKey = pages[lastPageIndex].length > 1 ? pages[lastPageIndex].pop() : null;
+      if (movedKey) {
+        usedHeights[lastPageIndex] = Math.max(0, usedHeights[lastPageIndex] - (fullHeights[movedKey] || 0));
+        pages.push([movedKey]);
+        usedHeights.push(fullHeights[movedKey] || 0);
+        lastPageIndex += 1;
+      }
+      if (usedHeights[lastPageIndex] + signatureHeight > normalCapacity) {
+        pages.push([]);
+        usedHeights.push(0);
+      }
+    }
+
+    setMeasuredPages((current) => JSON.stringify(current) === JSON.stringify(pages) ? current : pages);
+  }, [isMultiPage, visibleSectionKeys, fontFamily, theme.fontSize, theme.spacing, data]);
+
   if (isMultiPage) {
-    const splitCount = Math.min(3, Math.ceil(activeSectionOrder.length / 2));
-    const page1Sections = activeSectionOrder.slice(0, splitCount);
-    const page2Sections = activeSectionOrder.slice(splitCount);
+    const pages = measuredPages.length > 0 ? measuredPages : [visibleSectionKeys];
+    const totalPages = pages.length;
 
     return (
       <div
         className="minimal-classic-template multi-page-layout"
         style={{ fontFamily: fontFamily, color: colorTheme.text }}
       >
-        <div className="resume-page-sheet page-1">
-          <div className="page-badge">Page 1 of 2</div>
-          <header className="minimal-header">
-            <h1 className="minimal-name" style={{ color: colorTheme.primary }}>
-              {personalInfo.fullName}
-            </h1>
-            <div className="minimal-jobtitle" style={{ color: colorTheme.secondary }}>
-              {personalInfo.jobTitle}
+        <div ref={measureRef} className="resume-page-sheet exact-pagination-measurer" aria-hidden="true">
+          <div data-measure-header>{headerContent}</div>
+          {visibleSectionKeys.map((key) => (
+            <div key={key} data-measure-section={key}>{sectionMap[key]}</div>
+          ))}
+          <div data-minimal-measure-signature>{signatureBlock}</div>
+        </div>
+
+        {pages.map((pageSections, pageIndex) => (
+          <React.Fragment key={`page-${pageIndex + 1}`}>
+            {pageIndex > 0 && (
+              <div className="page-break-gap">
+                <span className="page-break-label">--- Page {pageIndex + 1} of {totalPages} Sheet Below ---</span>
+              </div>
+            )}
+            <div className={`resume-page-sheet page-${pageIndex + 1}`}>
+              <div className="page-badge">Page {pageIndex + 1} of {totalPages}</div>
+              {pageIndex === 0 && headerContent}
+              {pageSections.map((key, index) => renderSection(key, index, pageSections))}
+              {pageIndex === totalPages - 1 && signatureBlock}
             </div>
-            <div className="minimal-contact-line">{contacts.join(' • ')}</div>
-          </header>
-
-          {page1Sections.map((key) => sectionMap[key])}
-        </div>
-
-        <div className="page-break-gap">
-          <span className="page-break-label">--- Page 2 of 2 Sheet Below ---</span>
-        </div>
-
-        <div className="resume-page-sheet page-2">
-          <div className="page-badge">Page 2 of 2</div>
-          <header className="minimal-header mini-header">
-            <h2 className="minimal-name" style={{ color: colorTheme.primary, fontSize: '1.4rem' }}>
-              {personalInfo.fullName} <span style={{ fontSize: '0.85rem', color: colorTheme.secondary }}>— Continued</span>
-            </h2>
-          </header>
-
-          {page2Sections.map((key) => sectionMap[key])}
-        </div>
+          </React.Fragment>
+        ))}
       </div>
     );
   }
@@ -263,20 +413,9 @@ export const MinimalClassicTemplate: React.FC<TemplateProps> = ({ data, theme })
       style={{ fontFamily: fontFamily || 'Merriweather', color: colorTheme.text }}
     >
       <div className="resume-page-sheet page-1">
-        <header className="minimal-header">
-          {showPhoto && personalInfo.photoUrl && (
-            <img src={personalInfo.photoUrl} alt={personalInfo.fullName} className="minimal-photo" />
-          )}
-          <h1 className="minimal-name" style={{ color: colorTheme.primary }}>
-            {personalInfo.fullName}
-          </h1>
-          <div className="minimal-jobtitle" style={{ color: colorTheme.secondary }}>
-            {personalInfo.jobTitle}
-          </div>
-          <div className="minimal-contact-line">{contacts.join(' • ')}</div>
-        </header>
-
-        {activeSectionOrder.map((key) => sectionMap[key])}
+        {headerContent}
+        {visibleSectionKeys.map((key, index) => renderSection(key, index, visibleSectionKeys))}
+        {signatureBlock}
       </div>
     </div>
   );

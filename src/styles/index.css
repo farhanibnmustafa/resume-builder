@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=Outfit:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=Roboto:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Fira+Code:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=Outfit:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,400&family=Roboto:wght@400;500;700&display=swap');
 
 :root {
   --bg-app: #0b0f17;
@@ -1335,14 +1335,16 @@ body {
 .resume-page-sheet {
   width: 210mm;
   min-height: 297mm;
+  height: 297mm;
   background: #ffffff !important;
   color: #0f172a;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-  padding: 14mm 16mm;
+  padding: 16mm 16mm;
   border-radius: 2px;
   box-sizing: border-box;
   position: relative;
   margin-bottom: 24px;
+  overflow: hidden;
 }
 
 .page-break-gap {
@@ -1373,6 +1375,19 @@ body {
   letter-spacing: 0.5px;
 }
 
+/* Off-screen, full-width copy used to calculate content-aware A4 pagination. */
+.exact-pagination-measurer {
+  position: absolute !important;
+  left: -100000px !important;
+  top: 0 !important;
+  visibility: hidden !important;
+  height: auto !important;
+  min-height: 0 !important;
+  margin: 0 !important;
+  box-shadow: none !important;
+  pointer-events: none !important;
+}
+
 .mini-header {
   padding-bottom: 8px;
   margin-bottom: 14px;
@@ -1383,38 +1398,114 @@ body {
   font-weight: 700;
 }
 
-/* Font Scales */
-.font-scale-small { font-size: 0.88rem; }
-.font-scale-medium { font-size: 0.95rem; }
-.font-scale-large { font-size: 1.05rem; }
+/* Font Scale Controls */
+.font-scale-small {
+  font-size: 0.92em;
+}
 
-/* Spacing Scales */
-.spacing-compact { line-height: 1.35; }
-.spacing-compact .main-section,
+.font-scale-medium {
+  font-size: 1em;
+}
+
+.font-scale-large {
+  font-size: 1.08em;
+}
+
+/* Spacing Scales - Compact (Tight layout for fitting 1 page) */
+.spacing-compact {
+  line-height: 1.35;
+}
 .spacing-compact .exact-section,
+.spacing-compact .main-section,
 .spacing-compact .minimal-section,
 .spacing-compact .tech-section,
 .spacing-compact .creative-section,
 .spacing-compact .academic-section,
-.spacing-compact .compact-section { margin-bottom: 18px; }
+.spacing-compact .compact-section {
+  margin-bottom: 12px !important;
+}
+.spacing-compact .exact-timeline-entry,
+.spacing-compact .exact-project-item,
+.spacing-compact .ref-card,
+.spacing-compact .exact-ref-card,
+.spacing-compact .compact-exp-item,
+.spacing-compact .tech-exp-item,
+.spacing-compact .minimal-exp-item,
+.spacing-compact .academic-item,
+.spacing-compact .creative-edu-block {
+  margin-bottom: 8px !important;
+}
+.spacing-compact .exact-bullet-list li,
+.spacing-compact .compact-bullet-list li,
+.spacing-compact .tech-bullet-list li,
+.spacing-compact .minimal-bullet-list li {
+  margin-bottom: 2px !important;
+  line-height: 1.35 !important;
+}
 
-.spacing-comfortable { line-height: 1.5; }
-.spacing-comfortable .main-section,
+/* Spacing Scales - Comfortable (Standard balanced layout) */
+.spacing-comfortable {
+  line-height: 1.5;
+}
 .spacing-comfortable .exact-section,
+.spacing-comfortable .main-section,
 .spacing-comfortable .minimal-section,
 .spacing-comfortable .tech-section,
 .spacing-comfortable .creative-section,
 .spacing-comfortable .academic-section,
-.spacing-comfortable .compact-section { margin-bottom: 28px; }
+.spacing-comfortable .compact-section {
+  margin-bottom: 20px !important;
+}
+.spacing-comfortable .exact-timeline-entry,
+.spacing-comfortable .exact-project-item,
+.spacing-comfortable .ref-card,
+.spacing-comfortable .exact-ref-card,
+.spacing-comfortable .compact-exp-item,
+.spacing-comfortable .tech-exp-item,
+.spacing-comfortable .minimal-exp-item,
+.spacing-comfortable .academic-item,
+.spacing-comfortable .creative-edu-block {
+  margin-bottom: 14px !important;
+}
+.spacing-comfortable .exact-bullet-list li,
+.spacing-comfortable .compact-bullet-list li,
+.spacing-comfortable .tech-bullet-list li,
+.spacing-comfortable .minimal-bullet-list li {
+  margin-bottom: 4px !important;
+  line-height: 1.5 !important;
+}
 
-.spacing-spacious { line-height: 1.65; }
-.spacing-spacious .main-section,
+/* Spacing Scales - Spacious (Roomy layout for 2-page or sparse CVs) */
+.spacing-spacious {
+  line-height: 1.65;
+}
 .spacing-spacious .exact-section,
+.spacing-spacious .main-section,
 .spacing-spacious .minimal-section,
 .spacing-spacious .tech-section,
 .spacing-spacious .creative-section,
 .spacing-spacious .academic-section,
-.spacing-spacious .compact-section { margin-bottom: 38px; }
+.spacing-spacious .compact-section {
+  margin-bottom: 30px !important;
+}
+.spacing-spacious .exact-timeline-entry,
+.spacing-spacious .exact-project-item,
+.spacing-spacious .ref-card,
+.spacing-spacious .exact-ref-card,
+.spacing-spacious .compact-exp-item,
+.spacing-spacious .tech-exp-item,
+.spacing-spacious .minimal-exp-item,
+.spacing-spacious .academic-item,
+.spacing-spacious .creative-edu-block {
+  margin-bottom: 20px !important;
+}
+.spacing-spacious .exact-bullet-list li,
+.spacing-spacious .compact-bullet-list li,
+.spacing-spacious .tech-bullet-list li,
+.spacing-spacious .minimal-bullet-list li {
+  margin-bottom: 7px !important;
+  line-height: 1.65 !important;
+}
 
 /* Template Common Classes */
 /* 1. Modern Executive Template */
@@ -1431,25 +1522,37 @@ body {
   position: relative;
 }
 
+.executive-header.mini-header {
+  padding-bottom: 10px;
+  margin-bottom: 14px;
+}
+
 .header-name {
-  font-size: 2.4rem;
+  font-size: 2.3rem;
   font-weight: 800;
-  letter-spacing: -0.6px;
-  line-height: 1.1;
+  letter-spacing: -0.5px;
+  line-height: 1.15;
+}
+
+.header-name-mini {
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  line-height: 1.2;
 }
 
 .header-title {
-  font-size: 1.15rem;
+  font-size: 1.12rem;
   font-weight: 600;
   margin-top: 4px;
-  letter-spacing: -0.2px;
+  letter-spacing: -0.1px;
 }
 
 .template-body-grid {
   display: grid;
   grid-template-columns: 220px 1fr;
   gap: 22px;
-  align-items: start;
+  align-items: stretch;
 }
 
 .modern-executive-template.sidebar-right .template-body-grid {
@@ -1457,30 +1560,31 @@ body {
 }
 
 .modern-sidebar {
-  padding: 18px;
+  padding: 16px;
   border-radius: 8px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
-  font-size: 0.85rem;
+  gap: 16px;
+  font-size: 0.84rem;
   box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+  height: 100%;
+  box-sizing: border-box;
 }
 
 .photo-wrapper {
   text-align: center;
+  margin-bottom: 4px;
 }
 
 .user-photo {
-  width: 105px;
-  height: 105px;
-  border-radius: 50%;
   object-fit: cover;
-  border: 3.5px solid #ffffff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 3px solid #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  display: inline-block;
 }
 
 .sidebar-title {
-  font-size: 0.88rem;
+  font-size: 0.85rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.6px;
@@ -1493,42 +1597,67 @@ body {
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 9px;
+  gap: 8px;
+  padding: 0;
+  margin: 0;
 }
 
 .contact-list li {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 8px;
   word-break: break-word;
-  font-size: 0.83rem;
+  font-size: 0.82rem;
+  color: #334155;
+}
+
+.contact-icon-bg {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }
 
 .contact-list a {
   color: inherit;
   text-decoration: none;
+  font-weight: 500;
+}
+
+.contact-list a:hover {
+  text-decoration: underline;
 }
 
 .skill-cat-block {
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .skill-cat-name {
-  font-size: 0.82rem;
+  font-size: 0.81rem;
   font-weight: 700;
-  margin-bottom: 5px;
+  margin-bottom: 4px;
 }
 
 .skills-tags {
   display: flex;
   flex-direction: column;
-  gap: 7px;
+  gap: 6px;
 }
 
 .skill-tag-item {
   display: flex;
   flex-direction: column;
   gap: 3px;
+}
+
+.skill-label-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.79rem;
+  font-weight: 500;
 }
 
 .skill-bar-track {
@@ -1545,37 +1674,39 @@ body {
 }
 
 .edu-sidebar-item {
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
-.edu-degree { font-weight: 700; font-size: 0.88rem; }
+.edu-degree { font-weight: 700; font-size: 0.86rem; }
 .edu-institution { font-size: 0.8rem; color: #475569; }
-.edu-dates { font-size: 0.76rem; color: #64748b; font-weight: 500; }
+.edu-dates { font-size: 0.75rem; color: #64748b; font-weight: 500; }
+.edu-gpa { font-size: 0.75rem; color: #475569; font-weight: 600; }
 
 .main-content {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
 }
 
 .section-heading {
-  font-size: 1.08rem;
+  font-size: 1.05rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.6px;
-  padding-bottom: 5px;
+  padding-bottom: 4px;
   border-bottom: 2px solid;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .summary-text {
-  font-size: 0.92rem;
+  font-size: 0.9rem;
   color: #334155;
   line-height: 1.55;
+  margin: 0;
 }
 
 .experience-item, .project-item {
-  margin-bottom: 14px;
+  margin-bottom: 12px;
 }
 
 .exp-header, .proj-header {
@@ -1585,19 +1716,20 @@ body {
   font-weight: 700;
 }
 
-.exp-position { font-size: 0.98rem; color: #0f172a; }
-.exp-company { font-size: 0.92rem; color: #334155; }
-.exp-dates { font-size: 0.82rem; color: #64748b; font-weight: 500; }
+.exp-position { font-size: 0.96rem; color: #0f172a; font-weight: 700; }
+.exp-company { font-size: 0.9rem; font-weight: 600; }
+.exp-dates { font-size: 0.81rem; font-weight: 600; }
 
 .exp-highlights {
-  padding-left: 20px;
-  margin-top: 5px;
+  padding-left: 18px;
+  margin-top: 4px;
+  margin-bottom: 0;
 }
 
 .exp-highlights li {
-  font-size: 0.87rem;
+  font-size: 0.86rem;
   color: #334155;
-  margin-bottom: 4px;
+  margin-bottom: 3px;
   line-height: 1.45;
 }
 
@@ -1980,20 +2112,20 @@ body {
 }
 
 .exact-name {
-  font-size: 2.4rem;
-  font-weight: 700;
+  font-size: 1.85rem;
+  font-weight: 600;
   color: #0f172a;
-  letter-spacing: -0.6px;
-  line-height: 1.15;
-  margin-bottom: 6px;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+  margin-bottom: 4px;
 }
 
 .exact-subtitle {
-  font-size: 1.05rem;
-  font-weight: 600;
-  margin-bottom: 12px;
+  font-size: 0.92rem;
+  font-weight: 500;
+  margin-bottom: 10px;
   color: #1B2A8A;
-  letter-spacing: 0.2px;
+  letter-spacing: 0.1px;
 }
 
 .exact-contacts-row {
@@ -2079,6 +2211,42 @@ body {
   flex-shrink: 0;
 }
 
+/* ATS-first Tech Innovator output: keep every label and URL as real text,
+   while removing decorative glyphs that can disrupt older ATS parsers. */
+.exact-pdf-template svg,
+.exact-pdf-template .exact-icon-badge,
+.exact-pdf-template .exact-contact-icon-bg,
+.exact-pdf-template .exact-ref-icon-bg {
+  display: none !important;
+}
+
+.exact-pdf-template .exact-section-title,
+.exact-pdf-template .exact-contact-item,
+.exact-pdf-template .exact-proj-link,
+.exact-pdf-template .exact-ref-contact-item {
+  gap: 0 !important;
+}
+
+/* Keep identity/contact icons: they make the header easier to scan while the
+   adjacent ATS-readable text remains unchanged. */
+.exact-pdf-template .exact-contact-icon-bg {
+  display: inline-flex !important;
+}
+
+.exact-pdf-template .exact-contact-icon-bg svg {
+  display: block !important;
+}
+
+/* Chevron markers communicate list structure; keep them for experience
+   achievements, certifications and other true bullet lists. */
+.exact-pdf-template .exact-bullet-list li > svg {
+  display: block !important;
+}
+
+.exact-pdf-template .exact-contact-item {
+  gap: 6px !important;
+}
+
 .exact-title-icon {
   flex-shrink: 0;
 }
@@ -2104,12 +2272,13 @@ body {
 }
 
 .exact-skill-label {
-  width: 170px;
+  width: 205px;
   flex-shrink: 0;
   text-align: left;
   padding-right: 10px;
   color: #0f172a;
   font-weight: 700;
+  white-space: nowrap;
 }
 
 .exact-skill-value {
@@ -2121,33 +2290,22 @@ body {
 /* Experience & Education Timeline with Vertical Rule */
 .exact-timeline-entry {
   display: flex;
-  margin-bottom: 18px;
-}
-
-.exact-date-col {
-  width: 95px;
-  flex-shrink: 0;
-  text-align: left;
-  padding-right: 10px;
-  border-right: 1.5px solid #cbd5e1;
-  font-size: 0.84rem;
-  font-weight: 600;
-  color: #475569;
-  line-height: 1.35;
+  margin-bottom: 16px;
 }
 
 .exact-content-col {
   position: relative;
   flex: 1;
-  padding-left: 12px;
+  padding-left: 14px;
+  border-left: 2px solid #e2e8f0;
 }
 
 .exact-timeline-dot {
   position: absolute;
-  left: -4px;
-  top: 6px;
-  width: 7px;
-  height: 7px;
+  left: -5px;
+  top: 5px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   box-shadow: 0 0 0 2px #ffffff;
 }
@@ -2337,6 +2495,7 @@ body {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
   gap: 14px;
+  align-items: start;
   margin-top: 6px;
 }
 
@@ -2469,6 +2628,112 @@ body {
 .compact-mini-item { font-size: 0.78rem; margin-bottom: 4px; }
 .compact-footer-row { font-size: 0.78rem; display: flex; justify-content: space-between; margin-top: 8px; }
 
+/* Compact One-Pager header and section rhythm (template-isolated). */
+.compact-one-pager-template .compact-header {
+  padding: 14px 16px 14px 18px;
+  border-radius: 7px;
+}
+
+.compact-one-pager-template .compact-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.compact-one-pager-template .compact-header-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.compact-one-pager-template .compact-name {
+  margin: 0;
+  line-height: 1.08;
+}
+
+.compact-one-pager-template .compact-jobtitle {
+  display: block;
+  margin-top: 5px;
+  line-height: 1.3;
+}
+
+.compact-one-pager-template .compact-contacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px 14px;
+  margin-top: 7px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.compact-one-pager-template .compact-contacts span {
+  position: relative;
+}
+
+.compact-one-pager-template .compact-contacts span:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 0.2em;
+  right: -7px;
+  width: 1px;
+  height: 1em;
+  background: currentColor;
+  opacity: 0.3;
+}
+
+.compact-one-pager-template .compact-photo {
+  width: 78px;
+  height: 78px;
+  flex: 0 0 78px;
+  border: 2px solid;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center;
+  background: transparent;
+}
+
+.compact-one-pager-template .compact-skills-row {
+  border-top: 0;
+  border-bottom: 0;
+  padding-top: 0;
+}
+
+.compact-one-pager-template .compact-signature-block {
+  position: absolute;
+  right: 16mm;
+  bottom: 14mm;
+  width: 185px;
+  text-align: center;
+}
+
+.compact-one-pager-template .compact-signature-name {
+  font-family: 'Dancing Script', 'Brush Script MT', cursive;
+  font-size: 1.35rem;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.compact-one-pager-template .compact-signature-line {
+  height: 1.5px;
+  margin: 4px 0;
+}
+
+.compact-one-pager-template .compact-signature-label {
+  color: #0f172a;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.55px;
+  text-transform: uppercase;
+}
+
+.compact-one-pager-template .exact-pagination-measurer [data-compact-measure-signature] {
+  width: 185px;
+}
+
+.compact-one-pager-template .exact-pagination-measurer .compact-signature-block {
+  position: static;
+}
+
 /* Profile Picture Manager Styles */
 .photo-manager-container {
   background: #f8fafc;
@@ -2479,6 +2744,38 @@ body {
 
 .photo-dropzone {
   width: 100%;
+}
+
+.photo-processing-status,
+.photo-processing-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.photo-processing-status {
+  color: #1e3a8a;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+}
+
+.photo-processing-error {
+  color: #991b1b;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+.photo-processing-status .spin {
+  animation: photo-processing-spin 0.9s linear infinite;
+}
+
+@keyframes photo-processing-spin {
+  to { transform: rotate(360deg); }
 }
 
 .dropzone-empty {
@@ -2875,17 +3172,398 @@ body {
   margin-top: 6px;
 }
 
+/* ==========================================================================
+   MOBILE & TABLET RESPONSIVE STYLES
+   ========================================================================== */
+
+/* ── Floating Mobile View Switcher Pill ── */
+.mobile-view-switcher {
+  display: none;
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 999;
+  user-select: none;
+}
+
+.mobile-pill-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(15, 23, 42, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 30px;
+  padding: 5px 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 20px rgba(59, 130, 246, 0.25);
+}
+
+.mobile-pill-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 40px;
+}
+
+.mobile-pill-btn:hover {
+  color: #f8fafc;
+}
+
+.mobile-pill-btn.active {
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+}
+
+.mobile-pill-btn.ats-badge-btn {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 6px 12px;
+  border-radius: 18px;
+}
+
+.mobile-pill-btn.ats-badge-btn .ats-icon {
+  color: #34d399;
+}
+
+/* ── Tablet Viewports (< 1024px) ── */
+@media (max-width: 1024px) {
+  .app-header {
+    padding: 0 14px;
+    gap: 10px;
+  }
+
+  .header-left, .header-center, .header-right {
+    gap: 8px;
+  }
+
+  .title-input {
+    max-width: 180px;
+  }
+
+  .editor-content-scroll {
+    padding: 20px 24px;
+  }
+
+  .form-grid {
+    gap: 16px 14px;
+  }
+}
+
+/* ── Mobile Viewports (< 768px) ── */
+@media (max-width: 768px) {
+  /* Show Mobile Bottom Navigation Pill */
+  .mobile-view-switcher {
+    display: block;
+  }
+
+  /* Adjust App Shell for Mobile Bottom Bar */
+  .app-container {
+    height: 100vh;
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  .studio-workspace {
+    padding-bottom: 70px;
+  }
+
+  /* Input fields 16px font-size to prevent iOS Safari auto-zoom */
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="date"],
+  input[type="number"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+
+  /* Header Mobile Adaptations */
+  .app-header {
+    height: 56px;
+    padding: 0 12px;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+  }
+
+  .header-left {
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .logo-text {
+    font-size: 0.95rem;
+  }
+
+  .logo-badge {
+    display: none;
+  }
+
+  .title-input-wrapper {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .title-input {
+    width: 100%;
+    max-width: 140px;
+    font-size: 0.82rem;
+    padding: 4px 6px;
+    text-overflow: ellipsis;
+  }
+
+  /* Hide desktop view mode segmented buttons on mobile (mobile bottom pill replaces it) */
+  .header-center {
+    display: none;
+  }
+
+  .header-right {
+    gap: 6px;
+  }
+
+  .header-right .btn span {
+    display: none; /* Hide button text, keep icons compact */
+  }
+
+  .header-right .btn {
+    padding: 7px 10px;
+    min-height: 38px;
+  }
+
+  .header-right .btn-primary span {
+    display: inline; /* Keep PDF label visible on primary download button */
+  }
+
+  .header-ats-pill {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+  }
+
+  .header-ats-pill span {
+    display: none; /* Icon only ATS score on mobile header */
+  }
+
+  /* Editor Navigation Tabs Bar: Horizontal Touch Scroll */
+  .editor-tabs-bar {
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    padding: 8px 10px;
+    gap: 6px;
+    scrollbar-width: none;
+    background: #0b1120;
+    border-bottom: 1px solid #1e293b;
+  }
+
+  .editor-tabs-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tab-btn {
+    padding: 7px 12px;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+  }
+
+  .tab-btn span {
+    font-size: 0.78rem;
+  }
+
+  .editor-content-scroll {
+    padding: 16px 14px;
+  }
+
+  /* Form Layouts & Grids: Single Column on Mobile */
+  .form-grid,
+  .compact-two-col,
+  .font-options-grid,
+  .color-presets-grid,
+  .tech-projects-grid,
+  .exact-two-col-grid,
+  .exact-references-grid,
+  .references-grid,
+  .languages-grid {
+    grid-template-columns: 1fr !important;
+    gap: 14px !important;
+  }
+
+  .form-group.full-width,
+  .form-grid > * {
+    grid-column: span 1 !important;
+  }
+
+  .form-section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .form-section-header.between {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .form-section-header h2 {
+    font-size: 1.12rem;
+  }
+
+  /* Item Cards & Accordions on Mobile */
+  .card-item-header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .card-item-actions {
+    margin-left: auto;
+  }
+
+  /* Custom Section & AI Box Responsiveness */
+  .ai-suggestions-box {
+    margin-top: 8px;
+  }
+
+  .ai-card-actions {
+    flex-wrap: wrap;
+  }
+
+  /* Resizable Split Workspace Stacked View on Mobile */
+  .workspace-split.resizable {
+    flex-direction: column !important;
+    overflow-y: auto !important;
+  }
+
+  .workspace-split.resizable .split-panel.left-panel,
+  .workspace-split.resizable .split-panel.right-panel {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    flex: 1 0 auto !important;
+  }
+
+  .workspace-split.resizable .split-resizer {
+    display: none !important;
+  }
+
+  /* Preview Container & Paper Scaling on Mobile */
+  .preview-container {
+    height: 100%;
+    width: 100%;
+  }
+
+  .preview-toolbar {
+    padding: 8px 10px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .template-select {
+    min-width: 140px;
+    flex: 1;
+    font-size: 0.8rem;
+  }
+
+  .zoom-controls {
+    gap: 4px;
+  }
+
+  .zoom-controls .icon-btn {
+    width: 28px;
+    height: 28px;
+  }
+
+  .zoom-text {
+    min-width: 32px;
+    font-size: 0.75rem;
+  }
+
+  .paper-viewport {
+    padding: 12px 6px !important;
+  }
+
+  /* ATS Panel Responsiveness */
+  .ats-score-cards {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── Small Phone Viewports (< 480px) ── */
+@media (max-width: 480px) {
+  .logo-text {
+    display: none; /* Show logo icon only on tiny screens */
+  }
+
+  .title-input {
+    max-width: 110px;
+  }
+
+  .header-right .btn-ghost {
+    padding: 5px 6px;
+  }
+
+  .paper-viewport {
+    padding: 8px 4px !important;
+  }
+
+  .mobile-pill-btn {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+}
+
 /* Print Mode Styles */
 @media print {
+  @page {
+    size: A4 portrait;
+    margin: 0;
+  }
+
+  html,
   body {
     background: #ffffff !important;
     color: #000000 !important;
+    width: 210mm !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 
   .app-header,
   .editor-container,
-  .preview-toolbar {
+  .preview-toolbar,
+  .split-panel.left-panel,
+  .split-resizer {
     display: none !important;
+  }
+
+  .app-container,
+  .split-panel.right-panel,
+  .workspace-preview-only {
+    display: block !important;
+    position: static !important;
+    width: 210mm !important;
+    min-width: 210mm !important;
+    max-width: 210mm !important;
+    height: auto !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   .studio-workspace,
@@ -2896,7 +3574,7 @@ body {
     padding: 0 !important;
     margin: 0 !important;
     overflow: visible !important;
-    width: 100% !important;
+    width: 210mm !important;
     height: auto !important;
     background: transparent !important;
   }
@@ -2904,21 +3582,128 @@ body {
   .resume-paper {
     transform: none !important;
     box-shadow: none !important;
-    width: 100% !important;
+    width: 210mm !important;
     margin: 0 !important;
     padding: 0 !important;
   }
 
-  .page-break-gap, .page-badge {
+  .exact-pdf-template,
+  .multi-page-layout,
+  .single-page-layout {
+    display: block !important;
+    width: 210mm !important;
+    overflow: visible !important;
+  }
+
+  .page-break-gap,
+  .page-badge,
+  .exact-pagination-measurer {
     display: none !important;
   }
 
   .resume-page-sheet {
     box-shadow: none !important;
-    margin-bottom: 0 !important;
+    margin: 0 !important;
+    width: 210mm !important;
+    min-height: 297mm !important;
+    height: 297mm !important;
+    max-height: 297mm !important;
+    padding: 16mm !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    border-radius: 0 !important;
     page-break-after: always !important;
     break-after: page !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
+
+  .multi-page-layout > .resume-page-sheet:last-of-type,
+  .single-page-layout > .resume-page-sheet:last-of-type {
+    page-break-after: auto !important;
+    break-after: auto !important;
+  }
+
+  .exact-project-item,
+  .exact-timeline-entry,
+  .exact-ref-card,
+  .exact-skill-row,
+  .exact-two-col-grid,
+  .exact-signature-block,
+  .executive-signature-block,
+  .main-section,
+  .experience-item,
+  .project-item {
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+  }
+
+  .exact-section-title,
+  .section-heading {
+    break-after: avoid !important;
+    page-break-after: avoid !important;
+  }
+
+  /* Some PDF viewers do not reliably honor border-radius on replaced image
+     elements. clip-path guarantees that the square source canvas/corners are
+     not embedded visibly in the exported circular profile photo. */
+  .exact-photo.shape-circle,
+  .user-photo.shape-circle,
+  .creative-photo-ring img,
+  .minimal-photo,
+  .tech-photo,
+  .academic-header img,
+  .compact-header img {
+    border-radius: 50% !important;
+    clip-path: circle(50% at 50% 50%) !important;
+    -webkit-clip-path: circle(50% at 50% 50%) !important;
+  }
+}
+
+/* PDF Export Mode Styles (javascript html2pdf capture) */
+.is-exporting-pdf .page-badge,
+.is-exporting-pdf .page-break-gap {
+  display: none !important;
+}
+
+.is-exporting-pdf .resume-page-sheet {
+  box-shadow: none !important;
+  border: none !important;
+  margin-bottom: 0 !important;
+}
+
+.is-exporting-pdf .resume-page-sheet + .resume-page-sheet {
+  break-before: page !important;
+  page-break-before: always !important;
+}
+
+.is-exporting-pdf .exact-pagination-measurer {
+  display: none !important;
+}
+
+/* Page Break Avoid Rules for PDF Export & Print */
+.exact-project-item,
+.exact-timeline-entry,
+.exact-ref-card,
+.exact-skill-row,
+.exact-section-title,
+.exact-proj-header,
+.exact-proj-links,
+.tech-proj-card,
+.tech-exp-card,
+.tech-edu-card,
+.tech-section-title,
+.compact-exp-item,
+.compact-sec-heading,
+.minimal-exp-item,
+.minimal-section-title,
+.academic-item,
+.academic-heading,
+.creative-edu-block,
+.creative-section-title,
+.ref-card {
+  break-inside: avoid !important;
+  page-break-inside: avoid !important;
 }
 
 /* ── Global Skill Dots (used by all templates when showSkillBars is on) ── */
@@ -2964,3 +3749,99 @@ body {
   margin: 0 auto 10px;
 }
 
+/* Minimal Classic header and signature (template-isolated). */
+.minimal-classic-template .minimal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 28px;
+  padding: 4px 0 18px;
+  text-align: left;
+}
+
+.minimal-classic-template .minimal-header-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.minimal-classic-template .minimal-name {
+  margin: 0;
+  font-size: 2.15rem;
+  line-height: 1.08;
+}
+
+.minimal-classic-template .minimal-jobtitle {
+  margin-top: 6px;
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.minimal-classic-template .minimal-contact-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-top: 9px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.minimal-classic-template .minimal-contact-line span {
+  position: relative;
+}
+
+.minimal-classic-template .minimal-contact-line span:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: 0.22em;
+  right: -8px;
+  width: 1px;
+  height: 1em;
+  background: currentColor;
+  opacity: 0.35;
+}
+
+.minimal-classic-template .minimal-photo {
+  width: 104px;
+  height: 104px;
+  flex: 0 0 104px;
+  margin: 0;
+  border: 2px solid;
+  background: transparent;
+  object-position: center;
+}
+
+.minimal-classic-template .minimal-signature-block {
+  position: absolute;
+  right: 16mm;
+  bottom: 14mm;
+  width: 190px;
+  text-align: center;
+}
+
+.minimal-classic-template .minimal-signature-name {
+  font-family: 'Dancing Script', 'Brush Script MT', cursive;
+  font-size: 1.4rem;
+  font-weight: 600;
+  line-height: 1.1;
+}
+
+.minimal-classic-template .minimal-signature-line {
+  height: 1.5px;
+  margin: 4px 0;
+}
+
+.minimal-classic-template .minimal-signature-label {
+  color: #0f172a;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.55px;
+  text-transform: uppercase;
+}
+
+.minimal-classic-template .exact-pagination-measurer [data-minimal-measure-signature] {
+  width: 190px;
+}
+
+.minimal-classic-template .exact-pagination-measurer .minimal-signature-block {
+  position: static;
+}

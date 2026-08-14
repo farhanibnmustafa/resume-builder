@@ -11,6 +11,9 @@ export const PersonalInfoForm: React.FC = () => {
   const [showVerbsModal, setShowVerbsModal] = useState(false);
   const [activeTab, setActiveTab] = useState<'ai-generator' | 'action-verbs'>('ai-generator');
   const [notification, setNotification] = useState<string | null>(null);
+  const [isRemovingPhotoBackground, setIsRemovingPhotoBackground] = useState(false);
+  const [backgroundRemovalProgress, setBackgroundRemovalProgress] = useState(0);
+  const [photoProcessingError, setPhotoProcessingError] = useState<string | null>(null);
 
   const photoSize = themeConfig.photoSize || 105;
   const photoShape = themeConfig.photoShape || 'circle';
@@ -176,18 +179,48 @@ export const PersonalInfoForm: React.FC = () => {
     setShowVerbsModal(false);
   };
 
-  const handleFileUpload = (file: File) => {
+  const blobToDataUrl = (blob: Blob) => new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => typeof reader.result === 'string' ? resolve(reader.result) : reject(new Error('Could not read processed image.'));
+    reader.onerror = () => reject(reader.error || new Error('Could not read processed image.'));
+    reader.readAsDataURL(blob);
+  });
+
+  const handleFileUpload = async (file: File) => {
     if (!file.type.startsWith('image/')) {
       alert('Please upload a valid image file (PNG, JPG, WebP).');
       return;
     }
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      if (e.target?.result) {
-        updatePersonalInfo({ photoUrl: e.target.result as string });
-      }
-    };
-    reader.readAsDataURL(file);
+    if (file.size > 15 * 1024 * 1024) {
+      alert('Please upload an image smaller than 15 MB.');
+      return;
+    }
+
+    setIsRemovingPhotoBackground(true);
+    setBackgroundRemovalProgress(0);
+    setPhotoProcessingError(null);
+
+    try {
+      const { removeBackground } = await import('@imgly/background-removal');
+      const transparentPhoto = await removeBackground(file, {
+        model: 'isnet_quint8',
+        device: 'cpu',
+        output: {
+          format: 'image/png',
+          quality: 1,
+        },
+        progress: (_key: string, current: number, total: number) => {
+          if (total > 0) setBackgroundRemovalProgress(Math.round((current / total) * 100));
+        },
+      });
+      updatePersonalInfo({ photoUrl: await blobToDataUrl(transparentPhoto) });
+      setBackgroundRemovalProgress(100);
+    } catch (error) {
+      console.error('Automatic photo background removal failed:', error);
+      setPhotoProcessingError('Background removal failed. Check your internet connection and try again.');
+    } finally {
+      setIsRemovingPhotoBackground(false);
+    }
   };
 
   const handleDrop = (e: React.DragEvent) => {
@@ -351,6 +384,13 @@ export const PersonalInfoForm: React.FC = () => {
             onDragOver={(e) => e.preventDefault()}
             onDrop={handleDrop}
           >
+            {isRemovingPhotoBackground && (
+              <div className="photo-processing-status" role="status">
+                <RefreshCw size={18} className="spin" />
+                <span>Removing background… {backgroundRemovalProgress > 0 ? `${backgroundRemovalProgress}%` : 'preparing model'}</span>
+              </div>
+            )}
+            {photoProcessingError && <div className="photo-processing-error">{photoProcessingError}</div>}
             {personalInfo.photoUrl ? (
               <div className="photo-preview-bar">
                 <img 
@@ -365,6 +405,7 @@ export const PersonalInfoForm: React.FC = () => {
                     <button
                       type="button"
                       className="btn btn-secondary btn-sm"
+                      disabled={isRemovingPhotoBackground}
                       onClick={() => fileInputRef.current?.click()}
                     >
                       <Upload size={14} /> Change Photo
@@ -391,6 +432,7 @@ export const PersonalInfoForm: React.FC = () => {
               ref={fileInputRef}
               type="file"
               accept="image/*"
+              disabled={isRemovingPhotoBackground}
               className="hidden-file-input"
               onChange={(e) => {
                 if (e.target.files && e.target.files[0]) {

@@ -5,6 +5,8 @@ import { FormEditor } from './components/Editor/FormEditor';
 import { ResumePreview } from './components/Preview/ResumePreview';
 import { ResizableSplitWorkspace } from './components/ResizableSplitWorkspace';
 
+import { MobileViewSwitcher } from './components/Common/MobileViewSwitcher';
+
 const MainWorkspace: React.FC = () => {
   const { viewMode } = useResume();
 
@@ -33,6 +35,7 @@ export function App() {
       <div className="app-container">
         <Header />
         <MainWorkspace />
+        <MobileViewSwitcher />
       </div>
     </ResumeProvider>
   );
